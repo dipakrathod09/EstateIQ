@@ -13,7 +13,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d estateiq_db"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -51,6 +51,7 @@ services:
     command: >
       sh -c "python manage.py migrate &&
              python seed_db.py &&
+             python manage.py shell < investments/seed_investments.py &&
              python manage.py runserver 0.0.0.0:8000"
 
   frontend:
@@ -59,7 +60,7 @@ services:
       dockerfile: Dockerfile
     container_name: estateiq-frontend
     ports:
-      - "5173:5173"
+      - "5173:80"
     environment:
       - VITE_API_BASE_URL=http://localhost:8000/api
     depends_on:
