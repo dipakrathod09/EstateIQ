@@ -1,0 +1,232 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink-navy: #12283C;
+  --color-soft-ivory: #F7F5F0;
+  --color-warm-brass: #B98B4E;
+  --color-slate-grey: #5C6B73;
+  --color-signal-teal: #1F7A6C;
+  --color-signal-teal-text: #155E52;
+  --color-alert-coral: #E2574C;
+
+  --color-primary: #12283C;
+  --color-on-primary: #F7F5F0;
+  --color-primary-container: #1E3A52;
+  --color-secondary: #5C6B73;
+  --color-tertiary: #B98B4E;
+
+  --color-surface: #F7F5F0;
+  --color-background: #F7F5F0;
+  --color-on-surface: #12283C;
+  --color-on-surface-variant: #5C6B73;
+  --color-surface-variant: #EFEAE0;
+  --color-surface-container: #F3F0EA;
+  --color-surface-container-high: #EDE8E0;
+  --color-surface-container-highest: #E7E1D7;
+  --color-outline: #5C6B73;
+  --color-outline-variant: #C4C6CD;
+
+  --font-display: "EB Garamond", serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+/* Material Symbols Icon Font Utility */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Global Reset & Styling */
+body {
+  font-family: var(--font-body), sans-serif;
+  background-color: #F7F5F0;
+  color: #12283C;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3, h4, .font-serif-heading {
+  font-family: var(--font-display), serif;
+}
+
+.data-mono {
+  font-family: var(--font-mono), monospace;
+}
+
+/* Glassmorphism & Blueprint Card Components */
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(18, 40, 60, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px -2px rgba(18, 40, 60, 0.05);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+  border-color: rgba(185, 139, 78, 0.3);
+  box-shadow: 0 12px 32px -4px rgba(18, 40, 60, 0.1);
+  transform: translateY(-2px);
+}
+
+.glass-card-dark {
+  background: rgba(18, 40, 60, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(247, 245, 240, 0.1);
+  border-radius: 16px;
+  color: #F7F5F0;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* Action Buttons */
+.btn-primary {
+  background-color: #12283C;
+  color: #F7F5F0;
+  font-family: var(--font-body), sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 12px 24px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(18, 40, 60, 0.15);
+}
+
+.btn-primary:hover {
+  background-color: #1E3A52;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(18, 40, 60, 0.25);
+}
+
+.btn-secondary {
+  background-color: rgba(18, 40, 60, 0.05);
+  color: #12283C;
+  font-family: var(--font-body), sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 12px 24px;
+  border-radius: 12px;
+  border: 1px solid rgba(18, 40, 60, 0.12);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background-color: rgba(18, 40, 60, 0.1);
+  border-color: rgba(18, 40, 60, 0.2);
+}
+
+.btn-brass {
+  background-color: #B98B4E;
+  color: #FFFFFF;
+  font-family: var(--font-body), sans-serif;
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 12px;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(185, 139, 78, 0.25);
+}
+
+.btn-brass:hover {
+  background-color: #9D743E;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(185, 139, 78, 0.35);
+}
+
+/* Deal Rating Badges */
+.badge-good-deal {
+  background-color: rgba(31, 122, 108, 0.12);
+  color: #155E52;
+  border: 1px solid rgba(31, 122, 108, 0.25);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.badge-fair-price {
+  background-color: rgba(18, 40, 60, 0.08);
+  color: #12283C;
+  border: 1px solid rgba(18, 40, 60, 0.15);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.badge-overpriced {
+  background-color: rgba(226, 87, 76, 0.12);
+  color: #B9382E;
+  border: 1px solid rgba(226, 87, 76, 0.25);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Form Controls */
+.form-input, .form-select {
+  width: 100%;
+  background-color: #FFFFFF;
+  border: 1px solid rgba(18, 40, 60, 0.15);
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: #12283C;
+  font-family: var(--font-body), sans-serif;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.form-input:focus, .form-select:focus {
+  border-color: #B98B4E;
+  box-shadow: 0 0 0 3px rgba(185, 139, 78, 0.15);
+}
+
+.form-label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #5C6B73;
+  margin-bottom: 6px;
+}
