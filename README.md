@@ -81,7 +81,19 @@ venv\Scripts\activate
 
 pip install -r requirements.txt
 python manage.py migrate
-python manage.py shell < seed_db.py
+
+# Seed base properties & CRM data:
+# On Windows (PowerShell):
+Get-Content seed_db.py | python manage.py shell
+# On macOS/Linux:
+# python manage.py shell < seed_db.py
+
+# Seed Phase 5 investment directory listings:
+# On Windows (PowerShell):
+Get-Content investments/seed_investments.py | python manage.py shell
+# On macOS/Linux:
+# python manage.py shell < investments/seed_investments.py
+
 python manage.py runserver 8000
 ```
 
@@ -116,16 +128,15 @@ docker-compose up --build
 
 ## 🧪 Running the Test Suite
 
-The repository contains **143 automated Pytest unit and integration tests** with 100% pass rate.
+The repository contains **143 automated Pytest unit and integration tests** with a 100% pass rate.
 
 ```bash
 cd backend
+# Run full test suite:
 python -m pytest tests/ --tb=short
-```
 
-To run the programmatic smoke test suite:
-```bash
-python investments_smoke_runner.py
+# Run specific Phase 5 investments test suite:
+python -m pytest tests/test_investments.py --tb=short
 ```
 
 ---

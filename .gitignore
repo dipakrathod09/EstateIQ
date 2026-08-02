@@ -10,7 +10,7 @@ frontend/dist/
 frontend/build/
 .vite/
 
-# Python & Environment
+# Python & Virtual Environments
 __pycache__/
 *.py[cod]
 *$py.class
@@ -36,20 +36,21 @@ wheels/
 .installed.cfg
 *.egg
 
-# Pytest & Coverage
+# Pytest & Test Artifacts
 .pytest_cache/
 .coverage
 htmlcov/
 .nox/
 .hypothesis/
 
-# Django Databases & Media
+# Django Databases, Logs & Media
 backend/db.sqlite3
 *.sqlite3
+*.log
 media/
 static_root/
 
-# Environment / Secrets
+# Environment Variables & Secrets
 .env
 .env.local
 .env.*.local
@@ -61,7 +62,3 @@ static_root/
 *.swo
 .DS_Store
 Thumbs.db
-
-# Temporary UI Export Zip & Folders
-EstateIQ_UI_Export_Corrected.zip
-temp_ui_export/
