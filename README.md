@@ -1,6 +1,5 @@
 # EstateIQ — AI-Powered Real Estate & Investment Platform
 
-![EstateIQ Platform Architecture](https://img.shields.io/badge/Architecture-Microservices-1F7A6C?style=for-the-badge)
 ![Django DRF](https://img.shields.io/badge/Backend-Django_DRF_6.0-12283C?style=for-the-badge&logo=django)
 ![React Vite](https://img.shields.io/badge/Frontend-React_18_Vite_V8-B98B4E?style=for-the-badge&logo=react)
 ![FastAPI ML](https://img.shields.io/badge/ML_Service-FastAPI_Scikit--Learn-E2574C?style=for-the-badge&logo=fastapi)
@@ -41,7 +40,7 @@
 
 ---
 
-## 🛠️ Architecture & Tech Stack
+## 🛠️ Tech Stack
 
 | Layer | Technology |
 |---|---|
@@ -49,11 +48,10 @@
 | **Backend API** | Django 6.0, Django REST Framework, SimpleJWT (Bearer Authentication) |
 | **ML Microservice** | FastAPI, Uvicorn, Scikit-Learn (Random Forest Regressor), Joblib |
 | **Database** | SQLite (Dev) / PostgreSQL (Production) |
-| **Orchestration** | Docker, Docker Compose, Nginx |
 
 ---
 
-## ⚡ Quick Start & Installation
+## ⚡ Quick Start & Setup Guide
 
 ### 1. Prerequisites
 - Python 3.10+
@@ -62,18 +60,20 @@
 
 ### 2. Clone the Repository
 ```bash
-git clone https://github.com/YOUR_USERNAME/EstateIQ.git
+git clone https://github.com/dipakrathod09/EstateIQ.git
 cd EstateIQ
 ```
 
 ---
 
-### 3. Local Development Setup
+### 3. Local Setup Instructions
 
 #### Backend (Django REST Framework)
 ```bash
 cd backend
 python -m venv venv
+
+# Activate Virtual Environment:
 # On Windows:
 venv\Scripts\activate
 # On macOS/Linux:
@@ -112,17 +112,7 @@ npm install
 npm run dev
 ```
 
-Visit **`http://localhost:5173`** in your browser.
-
----
-
-### 4. Running with Docker Compose
-
-To spin up all services simultaneously (Django API on port 8000, ML Service on port 8001, Frontend on port 5173):
-
-```bash
-docker-compose up --build
-```
+Open **`http://localhost:5173`** in your browser.
 
 ---
 
