@@ -15,9 +15,19 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    const cleanUsername = username.trim();
+    if (!cleanUsername) {
+      setError('Please enter your username.');
+      return;
+    }
+    if (!password) {
+      setError('Please enter your password.');
+      return;
+    }
+
     setLoading(true);
     try {
-      await login(username, password);
+      await login(cleanUsername, password);
       navigate('/dashboard');
     } catch (err) {
       console.error('Login failed', err);

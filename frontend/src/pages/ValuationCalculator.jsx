@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import client from '../api/client';
 import DealBadge from '../components/DealBadge';
 import { Cpu, Calculator, Sparkles, TrendingDown, CheckCircle, ShieldCheck, MapPin, Building } from 'lucide-react';
 
 const ValuationCalculator = () => {
   const initialInputs = {
-    city: 'Ahmedabad',
+    city: 'Mumbai',
     sub_market: 'Central',
     locality: '',
     property_type: 'Apartment',
@@ -36,33 +36,94 @@ const ValuationCalculator = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // City-Locality Sync State
+  const [cityLocalities, setCityLocalities] = useState([]);
+
+  useEffect(() => {
+    const activeCity = inputs.city || 'Mumbai';
+    client.get(`/properties/localities/?city=${encodeURIComponent(activeCity)}`)
+      .then(res => {
+        const list = res.data || [];
+        setCityLocalities(list);
+        if (list.length > 0 && !list.includes(inputs.locality)) {
+          setInputs(prev => ({ ...prev, locality: list[0] }));
+        }
+      })
+      .catch(err => console.error('Failed to load localities for city:', err));
+  }, [inputs.city]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setResult(null);
+
+    const locality = (inputs.locality || '').trim();
+    const area = parseFloat(inputs.area_sqft);
+    const bhk = parseInt(inputs.bhk, 10);
+    const floor = parseInt(inputs.floor, 10);
+    const totalFloors = parseInt(inputs.total_floors, 10);
+
+    if (!locality) {
+      setError('Locality name is required.');
+      setLoading(false);
+      return;
+    }
+    if (isNaN(bhk) || bhk < 1 || bhk > 20) {
+      setError('Please enter a valid BHK count between 1 and 20.');
+      setLoading(false);
+      return;
+    }
+    if (isNaN(area) || area < 100 || area > 50000) {
+      setError('Please enter a realistic carpet area (between 100 sqft and 50,000 sqft).');
+      setLoading(false);
+      return;
+    }
+    if (!isNaN(floor) && !isNaN(totalFloors) && floor > totalFloors) {
+      setError('Floor level cannot exceed total building floors.');
+      setLoading(false);
+      return;
+    }
 
     const payload = {
-      ...inputs,
-      city: inputs.city || 'Ahmedabad',
-      sub_market: inputs.sub_market || inputs.city || 'Central',
-      locality: inputs.locality || 'Central Area',
-      bhk: inputs.bhk !== '' ? parseInt(inputs.bhk) : 2,
-      area_sqft: inputs.area_sqft !== '' ? parseFloat(inputs.area_sqft) : 1200.0,
-      floor: inputs.floor !== '' ? parseInt(inputs.floor) : 2,
-      total_floors: inputs.total_floors !== '' ? parseInt(inputs.total_floors) : 10,
-      age_years: inputs.age_years !== '' ? parseInt(inputs.age_years) : 3,
+      city: inputs.city || 'Mumbai',
+      sub_market: inputs.sub_market || 'Central',
+      locality,
+      property_type: inputs.property_type || 'Apartment',
+      bhk,
+      area_sqft: area,
+      floor: isNaN(floor) ? 2 : floor,
+      total_floors: isNaN(totalFloors) ? 10 : totalFloors,
+      age_years: inputs.age_years !== '' ? parseInt(inputs.age_years, 10) : 3,
       dist_metro_km: inputs.dist_metro_km !== '' ? parseFloat(inputs.dist_metro_km) : 1.5,
       dist_school_km: inputs.dist_school_km !== '' ? parseFloat(inputs.dist_school_km) : 1.0,
       dist_hospital_km: inputs.dist_hospital_km !== '' ? parseFloat(inputs.dist_hospital_km) : 1.5,
       dist_it_hub_km: inputs.dist_it_hub_km !== '' ? parseFloat(inputs.dist_it_hub_km) : 3.0,
-      listed_price: inputs.listed_price !== '' ? parseFloat(inputs.listed_price) : 5000000.0
+      listed_price: inputs.listed_price !== '' ? parseFloat(inputs.listed_price) : 5000000.0,
+      has_gym: inputs.has_gym,
+      has_pool: inputs.has_pool,
+      has_clubhouse: inputs.has_clubhouse,
+      has_security: inputs.has_security,
+      has_power_backup: inputs.has_power_backup,
+      has_parking: inputs.has_parking,
+      has_lift: inputs.has_lift,
+      rera_approved: inputs.rera_approved,
+      furnishing: inputs.furnishing,
+      facing: inputs.facing
     };
 
     client.post('/properties/estimate-price/', payload)
       .then(res => setResult(res.data))
       .catch(err => {
         console.error('Valuation calculation error', err);
-        setError('Failed to compute valuation. Please check input parameters.');
+        const data = err.response?.data;
+        let msg = 'Failed to compute valuation. Please check input parameters.';
+        if (data && typeof data === 'object') {
+          const firstKey = Object.keys(data)[0];
+          const val = Array.isArray(data[firstKey]) ? data[firstKey][0] : data[firstKey];
+          msg = `${firstKey}: ${val}`;
+        }
+        setError(msg);
       })
       .finally(() => setLoading(false));
   };
@@ -82,13 +143,13 @@ const ValuationCalculator = () => {
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-12">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#1F7A6C]/10 text-[#1F7A6C] border border-[#1F7A6C]/30 mb-4">
-            <Cpu className="w-4 h-4" /> Live XGBoost Microservice Engine
+            <Cpu className="w-4 h-4" /> AI Valuation Engine
           </div>
           <h1 className="font-serif text-3xl sm:text-5xl font-semibold text-[#12283C] mb-4">
-            AI Property Price Valuation Calculator
+            Instant AI Property Valuation
           </h1>
           <p className="text-[#5C6B73] text-sm sm:text-base leading-relaxed">
-            Direct real-time HTTP calls to FastAPI microservice trained on 100,000 synthetic Indian real estate data points. Zero translation layer.
+            Calculate estimated market value for any property in Mumbai based on area, BHK, floor level, building age, and key amenities.
           </p>
         </div>
 
@@ -107,29 +168,27 @@ const ValuationCalculator = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="form-label">Metro City</label>
-                    <select
-                      value={inputs.city}
-                      onChange={(e) => setInputs({ ...inputs, city: e.target.value })}
-                      className="form-select text-sm"
-                    >
-                      <option value="Ahmedabad">Ahmedabad</option>
-                      <option value="Bangalore">Bangalore</option>
-                      <option value="Delhi NCR">Delhi NCR</option>
-                      <option value="Hyderabad">Hyderabad</option>
-                      <option value="Mumbai">Mumbai</option>
-                    </select>
+                    <div className="flex items-center justify-between px-3.5 py-2.5 bg-[#F7F5F0] border border-[#12283C]/12 rounded-xl text-sm font-semibold text-[#12283C]">
+                      <span className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-[#B98B4E]" /> Mumbai
+                      </span>
+                      <span className="text-[10px] bg-[#1F7A6C]/15 text-[#155E52] px-2 py-0.5 rounded-full font-bold uppercase">Active Market</span>
+                    </div>
                   </div>
 
                   <div>
-                    <label className="form-label">Locality</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Worli, Saket, Bodakdev"
+                    <label className="form-label">Locality / Area ({inputs.city || 'Mumbai'})</label>
+                    <select
                       value={inputs.locality}
                       onChange={(e) => setInputs({ ...inputs, locality: e.target.value })}
-                      className="form-input text-sm"
+                      className="form-select text-sm font-medium"
                       required
-                    />
+                    >
+                      <option value="">-- Select Locality in {inputs.city || 'Mumbai'} --</option>
+                      {cityLocalities.map((loc) => (
+                        <option key={loc} value={loc}>{loc}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 

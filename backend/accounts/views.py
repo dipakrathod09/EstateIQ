@@ -7,6 +7,9 @@ from .serializers import RegisterSerializer, UserSerializer, CustomTokenObtainPa
 
 User = get_user_model()
 
+from .models import UserPreference
+from .serializers import RegisterSerializer, UserSerializer, CustomTokenObtainPairSerializer, UserPreferenceSerializer
+
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
@@ -19,6 +22,9 @@ class RegisterView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
+
+        # Create empty preference object for user
+        UserPreference.objects.get_or_create(user=user)
         
         # Auto generate JWT tokens on registration
         refresh = RefreshToken.for_user(user)
@@ -37,4 +43,15 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer
 
     def get_object(self):
-        return self.request.user
+        user = self.request.user
+        UserPreference.objects.get_or_create(user=user)
+        return user
+
+class UserPreferenceView(generics.RetrieveUpdateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = UserPreferenceSerializer
+
+    def get_object(self):
+        pref, _ = UserPreference.objects.get_or_create(user=self.request.user)
+        return pref
+

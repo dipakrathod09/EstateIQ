@@ -4,10 +4,20 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+from .models import UserPreference
+
+class UserPreferenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserPreference
+        fields = ['id', 'preferred_city', 'intent', 'preferred_bhk', 'updated_at']
+        read_only_fields = ['id', 'updated_at']
+
 class UserSerializer(serializers.ModelSerializer):
+    preference = UserPreferenceSerializer(read_only=True)
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'role', 'phone_number', 'company_name', 'avatar', 'first_name', 'last_name', 'created_at']
+        fields = ['id', 'username', 'email', 'role', 'phone_number', 'company_name', 'avatar', 'first_name', 'last_name', 'preference', 'created_at']
         read_only_fields = ['id', 'created_at']
 
 class RegisterSerializer(serializers.ModelSerializer):

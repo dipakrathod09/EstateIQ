@@ -136,3 +136,35 @@ class TestMeEndpoint:
     def test_me_unauthenticated_rejected(self, api_client):
         resp = api_client.get("/api/auth/me/")
         assert resp.status_code == 401
+
+
+@pytest.mark.django_db
+class TestUserPreferences:
+    def test_get_and_patch_preferences(self, agent_client):
+        # PATCH /api/auth/preferences/
+        patch_resp = agent_client.patch("/api/auth/preferences/", {
+            "preferred_city": "Mumbai",
+            "intent": "Buy",
+            "preferred_bhk": "2,3",
+        }, format="json")
+        assert patch_resp.status_code == 200, patch_resp.data
+        assert patch_resp.data["preferred_city"] == "Mumbai"
+        assert patch_resp.data["intent"] == "Buy"
+        assert patch_resp.data["preferred_bhk"] == "2,3"
+
+    def test_me_response_includes_preference(self, agent_client):
+        # Ensure preferences are included in /api/auth/me/
+        agent_client.patch("/api/auth/preferences/", {
+            "preferred_city": "Bangalore",
+            "intent": "Rent",
+        }, format="json")
+        me_resp = agent_client.get("/api/auth/me/")
+        assert me_resp.status_code == 200
+        assert "preference" in me_resp.data
+        assert me_resp.data["preference"]["preferred_city"] == "Bangalore"
+        assert me_resp.data["preference"]["intent"] == "Rent"
+
+    def test_unauthenticated_preferences_rejected(self, api_client):
+        resp = api_client.patch("/api/auth/preferences/", {"preferred_city": "Mumbai"})
+        assert resp.status_code == 401
+

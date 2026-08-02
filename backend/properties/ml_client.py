@@ -14,6 +14,11 @@ def get_price_prediction(property_obj_or_dict):
     Includes listed_price so the ML service computes deal_tag.
     Has a 3-second timeout and catches connection errors gracefully.
     Returns prediction dict if successful, or None if the ML service is down.
+
+    IMPORTANT: Distance fields (dist_metro_km etc.) are OMITTED from the JSON
+    payload when their value is None. This allows the ML service's Pydantic schema
+    to apply its declared Field(default=...) for those keys. Sending an explicit
+    null would bypass the default and cause a Pydantic 422 validation error.
     """
     if property_obj_or_dict is None:
         return None
@@ -25,17 +30,13 @@ def get_price_prediction(property_obj_or_dict):
             "sub_market": p.sub_market or p.city or "Central",
             "locality": p.locality or "Central Area",
             "property_type": p.property_type or "Apartment",
-            "bhk": int(p.bhk or 2),
-            "area_sqft": float(p.area_sqft or 1200.0),
-            "floor": int(p.floor or 2),
-            "total_floors": int(p.total_floors or 10),
-            "age_years": int(p.age_years or 3),
+            "bhk": int(p.bhk) if p.bhk is not None else 2,
+            "area_sqft": float(p.area_sqft) if p.area_sqft is not None else 1200.0,
+            "floor": int(p.floor) if p.floor is not None else 2,
+            "total_floors": int(p.total_floors) if p.total_floors is not None else 10,
+            "age_years": int(p.age_years) if p.age_years is not None else 3,
             "furnishing": p.furnishing or "Semi-Furnished",
             "facing": p.facing or "East",
-            "dist_metro_km": float(p.dist_metro_km or 1.5),
-            "dist_school_km": float(p.dist_school_km or 1.0),
-            "dist_hospital_km": float(p.dist_hospital_km or 1.5),
-            "dist_it_hub_km": float(p.dist_it_hub_km or 3.0),
             "has_gym": bool(p.has_gym),
             "has_pool": bool(p.has_pool),
             "has_clubhouse": bool(p.has_clubhouse),
@@ -44,8 +45,20 @@ def get_price_prediction(property_obj_or_dict):
             "has_parking": bool(p.has_parking),
             "has_lift": bool(p.has_lift),
             "rera_approved": bool(p.rera_approved),
-            "listed_price": float(p.listed_price) if p.listed_price else None
+            "listed_price": float(p.listed_price) if p.listed_price is not None else None
         }
+        # Omit None-valued distance fields so Pydantic Field(default=...) applies on the ML service side.
+        # Sending "dist_metro_km": null explicitly would bypass those defaults and trigger a 422.
+        # Also avoids the 0.0-as-falsy bug: `float(0.0 or 1.5)` → 1.5 (wrong); `is not None` guard is correct.
+        if p.dist_metro_km is not None:
+            payload["dist_metro_km"] = float(p.dist_metro_km)
+        if p.dist_school_km is not None:
+            payload["dist_school_km"] = float(p.dist_school_km)
+        if p.dist_hospital_km is not None:
+            payload["dist_hospital_km"] = float(p.dist_hospital_km)
+        if p.dist_it_hub_km is not None:
+            payload["dist_it_hub_km"] = float(p.dist_it_hub_km)
+
     elif isinstance(property_obj_or_dict, dict):
         d = property_obj_or_dict
         payload = {
@@ -53,17 +66,13 @@ def get_price_prediction(property_obj_or_dict):
             "sub_market": d.get("sub_market", "Central"),
             "locality": d.get("locality", "Bodakdev"),
             "property_type": d.get("property_type", "Apartment"),
-            "bhk": int(d.get("bhk", 2)),
-            "area_sqft": float(d.get("area_sqft", 1200.0)),
-            "floor": int(d.get("floor", 2)),
-            "total_floors": int(d.get("total_floors", 10)),
-            "age_years": int(d.get("age_years", 3)),
+            "bhk": int(d["bhk"]) if d.get("bhk") is not None else 2,
+            "area_sqft": float(d["area_sqft"]) if d.get("area_sqft") is not None else 1200.0,
+            "floor": int(d["floor"]) if d.get("floor") is not None else 2,
+            "total_floors": int(d["total_floors"]) if d.get("total_floors") is not None else 10,
+            "age_years": int(d["age_years"]) if d.get("age_years") is not None else 3,
             "furnishing": d.get("furnishing", "Semi-Furnished"),
             "facing": d.get("facing", "East"),
-            "dist_metro_km": float(d.get("dist_metro_km", 1.5)),
-            "dist_school_km": float(d.get("dist_school_km", 1.0)),
-            "dist_hospital_km": float(d.get("dist_hospital_km", 1.5)),
-            "dist_it_hub_km": float(d.get("dist_it_hub_km", 3.0)),
             "has_gym": bool(d.get("has_gym", False)),
             "has_pool": bool(d.get("has_pool", False)),
             "has_clubhouse": bool(d.get("has_clubhouse", False)),
@@ -72,8 +81,13 @@ def get_price_prediction(property_obj_or_dict):
             "has_parking": bool(d.get("has_parking", True)),
             "has_lift": bool(d.get("has_lift", True)),
             "rera_approved": bool(d.get("rera_approved", True)),
-            "listed_price": float(d.get("listed_price", 5000000.0)) if d.get("listed_price") else None
+            "listed_price": float(d["listed_price"]) if d.get("listed_price") is not None else None
         }
+        # Same omission logic for dict path: only include distance keys when non-null values are present.
+        for dist_field in ("dist_metro_km", "dist_school_km", "dist_hospital_km", "dist_it_hub_km"):
+            val = d.get(dist_field)
+            if val is not None:
+                payload[dist_field] = float(val)
     else:
         return None
 

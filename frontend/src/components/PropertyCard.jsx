@@ -112,7 +112,7 @@ const PropertyCard = ({ property, onEdit, onDelete }) => {
           <div className="text-right">
             {property.predicted_price && (
               <div>
-                <span className="text-[10px] text-[#1F7A6C] font-bold block uppercase tracking-wider">ML Est.</span>
+                <span className="text-[10px] text-[#1F7A6C] font-bold block uppercase tracking-wider">AI Est.</span>
                 <span className="data-mono text-sm font-semibold text-[#1F7A6C]">
                   {formatPrice(property.predicted_price)}
                 </span>

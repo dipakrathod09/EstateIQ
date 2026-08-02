@@ -21,16 +21,56 @@ const Register = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const validateForm = () => {
+    if (!formData.username.trim() || formData.username.trim().length < 3) {
+      return 'Username must be at least 3 characters long.';
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(formData.username.trim())) {
+      return 'Username can only contain letters, numbers, and underscores.';
+    }
+    if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      return 'Please enter a valid email address.';
+    }
+    if (!formData.password || formData.password.length < 6) {
+      return 'Password must be at least 6 characters long.';
+    }
+    if (formData.phone_number.trim() && !/^\+?[\d\s\-()]{10,15}$/.test(formData.phone_number.trim())) {
+      return 'Please enter a valid phone number (10 to 15 digits).';
+    }
+    return null;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
     setLoading(true);
     try {
-      await register(formData);
-      navigate('/dashboard');
+      await register({
+        ...formData,
+        username: formData.username.trim(),
+        email: formData.email.trim().toLowerCase(),
+        first_name: formData.first_name.trim(),
+        last_name: formData.last_name.trim(),
+        phone_number: formData.phone_number.trim(),
+        company_name: formData.company_name.trim()
+      });
+      navigate('/onboarding');
     } catch (err) {
       console.error('Registration failed', err);
-      setError(err.response?.data?.detail || JSON.stringify(err.response?.data) || 'Registration failed.');
+      const data = err.response?.data;
+      if (data && typeof data === 'object') {
+        const firstKey = Object.keys(data)[0];
+        const msg = Array.isArray(data[firstKey]) ? data[firstKey][0] : data[firstKey];
+        setError(`${firstKey}: ${msg}`);
+      } else {
+        setError('Registration failed. Please check your details and try again.');
+      }
     } finally {
       setLoading(false);
     }

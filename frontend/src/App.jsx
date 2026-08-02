@@ -12,6 +12,8 @@ import Investments from './pages/Investments';
 import InvestmentDetail from './pages/InvestmentDetail';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Onboarding from './pages/Onboarding';
+import NotFound from './pages/NotFound';
 
 function App() {
   return (
@@ -32,6 +34,8 @@ function App() {
               <Route path="/dashboard/landlord" element={<Dashboard forcedRole="landlord" />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/onboarding" element={<Onboarding />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
           <Footer />

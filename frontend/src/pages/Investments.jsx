@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SlidersHorizontal, TrendingUp, Clock, X, RotateCcw } from 'lucide-react';
+import { SlidersHorizontal, TrendingUp, Clock, X, RotateCcw, AlertTriangle } from 'lucide-react';
 import InvestmentCard from '../components/InvestmentCard';
 import { getInvestmentListings } from '../api/investments';
 
@@ -30,8 +30,11 @@ const Investments = () => {
     setError(null);
     try {
       const resp = await getInvestmentListings(f);
-      setListings(resp.data);
-    } catch {
+      const data = resp.data;
+      const listData = Array.isArray(data) ? data : (data.results || []);
+      setListings(listData);
+    } catch (err) {
+      console.error('Failed to load investments:', err);
       setError('Unable to load investment listings. Please try again.');
     } finally {
       setLoading(false);

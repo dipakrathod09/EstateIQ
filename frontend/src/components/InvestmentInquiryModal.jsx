@@ -37,11 +37,16 @@ const InvestmentInquiryModal = ({ listing, requestingPitchDeck = false, onClose 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const errs = validate();
-    if (Object.keys(errs).length) { setErrors(errs); return; }
     setSubmitting(true);
     setErrors({});
     try {
-      await submitInvestmentInquiry(listing.id, form);
+      const payload = {
+        ...form,
+        investor_name: form.investor_name.trim(),
+        email: form.email.trim().toLowerCase(),
+        phone: form.phone.trim(),
+      };
+      await submitInvestmentInquiry(listing.id, payload);
       setSuccess(true);
     } catch (err) {
       const data = err.response?.data;
@@ -104,7 +109,11 @@ const InvestmentInquiryModal = ({ listing, requestingPitchDeck = false, onClose 
               </div>
               <h3 className="font-serif text-xl font-semibold text-white mb-2">Inquiry Received</h3>
               <p className="text-white/70 text-sm leading-relaxed max-w-sm mx-auto">
-                An investment manager will review your inquiry and contact you within <strong className="text-white">2 business days</strong> to discuss this opportunity in detail.
+                {listing.is_sample_data !== false ? (
+                  <>Thanks for your interest — we&apos;ll notify you when real opportunities matching your preferences become available.</>
+                ) : (
+                  <>An investment manager will review your inquiry and contact you within <strong className="text-white">2 business days</strong> to discuss this opportunity in detail.</>
+                )}
               </p>
               <button onClick={onClose} className="btn-brass mt-6 mx-auto">
                 Done

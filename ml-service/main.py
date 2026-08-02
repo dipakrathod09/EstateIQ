@@ -22,7 +22,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "price_model_100k.pkl")
+MODEL_PATH_PRIMARY = os.path.join(os.path.dirname(__file__), "artifacts", "price_model_100k.pkl")
+MODEL_PATH_SECONDARY = os.path.join(os.path.dirname(__file__), "price_model_100k.pkl")
+MODEL_PATH = MODEL_PATH_PRIMARY if os.path.exists(MODEL_PATH_PRIMARY) else MODEL_PATH_SECONDARY
+
 model_bundle = None
 
 def load_ml_model():
@@ -30,10 +33,12 @@ def load_ml_model():
     if os.path.exists(MODEL_PATH):
         try:
             model_bundle = joblib.load(MODEL_PATH)
-            print(f"[ML Service] Model bundle loaded successfully from {MODEL_PATH}")
+            print(f"[ML Service] Real XGBoost 100k Model bundle loaded successfully from {MODEL_PATH}")
         except Exception as e:
             print(f"[ML Service] Error loading model: {e}")
             model_bundle = None
+    else:
+        print(f"[ML Service] Model file not found at {MODEL_PATH}")
 
 load_ml_model()
 

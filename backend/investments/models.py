@@ -57,6 +57,10 @@ class InvestmentListing(models.Model):
         help_text="Maximum lock-in period in months (same as min for fixed periods)"
     )
     is_pre_launch = models.BooleanField(default=False)
+    is_sample_data = models.BooleanField(
+        default=True,
+        help_text="Flags listing as illustrative pilot sample data. Displays 'Sample Data' badge."
+    )
     early_access_ends_at = models.DateTimeField(
         null=True, blank=True,
         help_text="Datetime when early-access / pre-launch window closes. Drives countdown timer."

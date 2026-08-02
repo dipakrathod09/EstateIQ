@@ -52,6 +52,71 @@ const MetricTile = ({ icon: Icon, label, value, accent }) => (
   </div>
 );
 
+const InvestmentYieldCalculator = ({ minAmount, roiPct, yieldPct }) => {
+  const defaultAmt = minAmount || 1500000;
+  const [calcAmt, setCalcAmt] = useState(defaultAmt);
+
+  const annualRental = (calcAmt * (yieldPct || 5.0)) / 100;
+  const monthlyRental = annualRental / 12;
+  const annualTotalReturn = (calcAmt * (roiPct || 12.0)) / 100;
+  const projected3YearValue = calcAmt * Math.pow(1 + (roiPct || 12.0) / 100, 3);
+
+  const formatLakhs = (val) => {
+    if (val >= 10000000) return `₹${(val / 10000000).toFixed(2)} Cr`;
+    if (val >= 100000) return `₹${(val / 100000).toFixed(2)} Lakh`;
+    return `₹${Math.round(val).toLocaleString('en-IN')}`;
+  };
+
+  return (
+    <div className="glass-card p-6 bg-white border border-[#12283C]/10 rounded-2xl shadow-sm space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <span className="text-xs font-bold uppercase tracking-wider text-[#B98B4E] block mb-0.5">Interactive Estimator</span>
+          <h3 className="font-serif text-lg font-semibold text-[#12283C]">Investment Return Calculator</h3>
+        </div>
+        <span className="text-xs font-mono font-bold text-[#1F7A6C] bg-[#1F7A6C]/10 px-2.5 py-1 rounded-full">
+          {roiPct}% Projected ROI
+        </span>
+      </div>
+
+      <div>
+        <div className="flex justify-between items-center text-xs font-medium text-[#5C6B73] mb-2">
+          <span>Selected Ticket Size:</span>
+          <span className="font-mono font-bold text-[#12283C] text-sm">{formatLakhs(calcAmt)}</span>
+        </div>
+        <input
+          type="range"
+          min={defaultAmt}
+          max={defaultAmt * 10}
+          step={50000}
+          value={calcAmt}
+          onChange={(e) => setCalcAmt(Number(e.target.value))}
+          className="w-full h-2 bg-[#F7F5F0] rounded-lg appearance-none cursor-pointer accent-[#B98B4E]"
+        />
+        <div className="flex justify-between text-[10px] text-[#5C6B73] mt-1">
+          <span>Min Ticket: {formatLakhs(defaultAmt)}</span>
+          <span>Max Target: {formatLakhs(defaultAmt * 10)}</span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-[#12283C]/08 text-center">
+        <div className="p-3 bg-[#F7F5F0] rounded-xl">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-[#5C6B73] block mb-1">Est. Monthly Payout</span>
+          <span className="data-mono text-base font-bold text-[#1F7A6C]">{formatLakhs(monthlyRental)}</span>
+        </div>
+        <div className="p-3 bg-[#F7F5F0] rounded-xl">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-[#5C6B73] block mb-1">Est. Annual Return</span>
+          <span className="data-mono text-base font-bold text-[#B98B4E]">{formatLakhs(annualTotalReturn)}</span>
+        </div>
+        <div className="p-3 bg-[#F7F5F0] rounded-xl">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-[#5C6B73] block mb-1">Projected 3-Yr Value</span>
+          <span className="data-mono text-base font-bold text-[#12283C]">{formatLakhs(projected3YearValue)}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const InvestmentDetail = () => {
   const { id } = useParams();
   const [listing, setListing]   = useState(null);
@@ -105,7 +170,7 @@ const InvestmentDetail = () => {
 
         {/* Back Nav */}
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-6">
-          <Link to="/investments" className="inline-flex items-center gap-2 text-sm font-medium text-[#5C6B73] hover:text-[#12283C] transition-colors">
+          <Link to="/investments" className="inline-flex items-center gap-2 text-sm font-medium text-[#5C6B73] hover:text-[#12283C] transition-colors mb-4">
             <ArrowLeft className="w-4 h-4" /> Back to Investments
           </Link>
         </div>
@@ -174,6 +239,13 @@ const InvestmentDetail = () => {
                 <MetricTile icon={Banknote}   label="Min Ticket"   value={listing.min_investment_display}       accent="#12283C" />
                 <MetricTile icon={Lock}       label="Lock-In"      value={listing.lock_in_display}              accent="#5C6B73" />
               </div>
+
+              {/* Interactive Yield Estimator */}
+              <InvestmentYieldCalculator
+                minAmount={listing.min_investment_amount}
+                roiPct={parseFloat(listing.expected_roi_percentage)}
+                yieldPct={parseFloat(listing.projected_rental_yield)}
+              />
 
               {/* Additional details */}
               <div className="glass-card p-5">

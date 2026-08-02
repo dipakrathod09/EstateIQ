@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import client from '../api/client';
 import DealBadge from '../components/DealBadge';
 import PropertyCard from '../components/PropertyCard';
+import PropertyMap from '../components/PropertyMap';
 import { 
   MapPin, Maximize2, BedDouble, Building, Cpu, ShieldCheck, 
   Train, GraduationCap, Hospital, Briefcase, Check, Sparkles, Send, Phone, Mail, ArrowLeft, Edit, Trash2
@@ -39,6 +40,23 @@ const PropertyDetail = () => {
   });
   const [inquirySubmitting, setInquirySubmitting] = useState(false);
   const [inquirySuccess, setInquirySuccess] = useState(false);
+
+  // Edit Modal City-Locality Sync State
+  const [editCityLocalities, setEditCityLocalities] = useState([]);
+
+  useEffect(() => {
+    if (editData.city) {
+      client.get(`/properties/localities/?city=${encodeURIComponent(editData.city)}`)
+        .then(res => {
+          const list = res.data || [];
+          setEditCityLocalities(list);
+          if (list.length > 0 && !list.includes(editData.locality)) {
+            setEditData(prev => ({ ...prev, locality: list[0] }));
+          }
+        })
+        .catch(err => console.error('Failed to load localities for edit modal:', err));
+    }
+  }, [editData.city]);
 
   const fetchProperty = () => {
     setLoading(true);
@@ -77,23 +95,39 @@ const PropertyDetail = () => {
     fetchSimilarProperties();
   }, [id]);
 
+  const [inquiryError, setInquiryError] = useState(null);
+
   const handleInquirySubmit = (e) => {
     e.preventDefault();
+    setInquiryError(null);
+
+    const name = (inquiryData.name || '').trim();
+    const email = (inquiryData.email || '').trim();
+    const phone = (inquiryData.phone || '').trim();
+    const message = (inquiryData.message || '').trim();
+
+    if (!name) { setInquiryError('Please enter your full name.'); return; }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setInquiryError('Please enter a valid email address.'); return; }
+    if (!phone || !/^\+?[\d\s\-()]{10,15}$/.test(phone)) { setInquiryError('Please enter a valid phone number (10 to 15 digits).'); return; }
+    if (!message) { setInquiryError('Please enter your inquiry message.'); return; }
+
     setInquirySubmitting(true);
     client.post('/crm/inquiries/', {
       property: property.id,
-      ...inquiryData
+      name, email, phone, message
     }).then(() => {
       setInquirySuccess(true);
-    }).catch(err => console.error('Inquiry submission error', err))
-      .finally(() => setInquirySubmitting(false));
+    }).catch(err => {
+      console.error('Inquiry submission error', err);
+      setInquiryError('Failed to submit inquiry. Please try again.');
+    }).finally(() => setInquirySubmitting(false));
   };
 
   const handleOpenEdit = () => {
     setEditData({
       title: property.title || '',
       description: property.description || '',
-      city: property.city || 'Ahmedabad',
+      city: property.city || 'Mumbai',
       sub_market: property.sub_market || 'Central',
       locality: property.locality || '',
       property_type: property.property_type || 'Apartment',
@@ -125,17 +159,35 @@ const PropertyDetail = () => {
 
   const handleSaveEdit = (e) => {
     e.preventDefault();
-    setSubmittingEdit(true);
     setEditError(null);
+
+    const title = (editData.title || '').trim();
+    const locality = (editData.locality || '').trim();
+    const price = parseFloat(editData.listed_price);
+    const area = parseFloat(editData.area_sqft);
+    const bhk = parseInt(editData.bhk, 10);
+    const floor = parseInt(editData.floor, 10);
+    const totalFloors = parseInt(editData.total_floors, 10);
+
+    if (!title || title.length < 5) { setEditError('Property title must be at least 5 characters long.'); return; }
+    if (!locality) { setEditError('Locality is required.'); return; }
+    if (isNaN(price) || price < 100000) { setEditError('Please enter a realistic asking price (at least ₹1,00,000 / 1 Lakh).'); return; }
+    if (isNaN(area) || area < 100 || area > 50000) { setEditError('Please enter a realistic carpet area (between 100 sqft and 50,000 sqft).'); return; }
+    if (isNaN(bhk) || bhk < 1 || bhk > 20) { setEditError('Please enter a valid BHK between 1 and 20.'); return; }
+    if (!isNaN(floor) && !isNaN(totalFloors) && floor > totalFloors) {
+      setEditError('Floor level cannot exceed total floors in the building.');
+      return;
+    }
+
+    setSubmittingEdit(true);
 
     const payload = {
       ...editData,
-      bhk: editData.bhk !== '' ? parseInt(editData.bhk) : 2,
-      area_sqft: editData.area_sqft !== '' ? parseFloat(editData.area_sqft) : 1000.0,
-      listed_price: editData.listed_price !== '' ? parseFloat(editData.listed_price) : 5000000.0,
-      floor: editData.floor !== '' ? parseInt(editData.floor) : 2,
-      total_floors: editData.total_floors !== '' ? parseInt(editData.total_floors) : 10,
-      age_years: editData.age_years !== '' ? parseInt(editData.age_years) : 2
+      title, locality,
+      bhk, area_sqft: area, listed_price: price,
+      floor: isNaN(floor) ? 1 : floor,
+      total_floors: isNaN(totalFloors) ? 1 : totalFloors,
+      age_years: editData.age_years !== '' ? parseInt(editData.age_years, 10) : 2
     };
 
     client.put(`/properties/${id}/`, payload)
@@ -146,7 +198,7 @@ const PropertyDetail = () => {
       })
       .catch(err => {
         console.error('Update property error', err);
-        setEditError('Failed to update property details.');
+        setEditError('Failed to update property details. Check your inputs.');
       })
       .finally(() => setSubmittingEdit(false));
   };
@@ -296,10 +348,10 @@ const PropertyDetail = () => {
               </p>
             </div>
 
-            {/* Proximity Details */}
+            {/* Proximity Details & GIS Map */}
             <div className="glass-card p-8 bg-white border border-[#12283C]/10 rounded-3xl">
               <h2 className="font-serif text-2xl font-semibold text-[#12283C] mb-6">Location & Connectivity</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-semibold text-[#12283C]">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-semibold text-[#12283C] mb-6">
                 <div className="p-4 rounded-2xl bg-[#F7F5F0]">
                   <Train className="w-5 h-5 text-[#B98B4E] mb-2" />
                   <span className="text-[#5C6B73] block text-[11px]">Metro Station</span>
@@ -321,7 +373,24 @@ const PropertyDetail = () => {
                   <span className="data-mono font-bold text-sm">{property.dist_it_hub_km} km</span>
                 </div>
               </div>
+
+              {/* GIS Leaflet Map for Property Location */}
+              {property.latitude && property.longitude ? (
+                <div className="mt-6">
+                  <PropertyMap
+                    properties={[property]}
+                    selectedCity={property.city}
+                    selectedPropertyId={property.id}
+                    height="320px"
+                  />
+                </div>
+              ) : (
+                <div className="p-4 rounded-xl bg-[#F7F5F0] text-xs text-[#5C6B73] text-center">
+                  Geospatial coordinates pending for this listing.
+                </div>
+              )}
             </div>
+
 
           </div>
 
@@ -370,6 +439,11 @@ const PropertyDetail = () => {
                 </div>
               ) : (
                 <form onSubmit={handleInquirySubmit} className="space-y-4">
+                  {inquiryError && (
+                    <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 text-xs font-semibold">
+                      {inquiryError}
+                    </div>
+                  )}
                   <div>
                     <label className="form-label">Full Name</label>
                     <input
@@ -466,14 +540,18 @@ const PropertyDetail = () => {
                   </div>
 
                   <div>
-                    <label className="form-label">Locality</label>
-                    <input
-                      type="text"
+                    <label className="form-label">Locality / Area ({editData.city})</label>
+                    <select
                       value={editData.locality}
                       onChange={(e) => setEditData({ ...editData, locality: e.target.value })}
-                      className="form-input text-sm"
+                      className="form-select text-sm font-medium"
                       required
-                    />
+                    >
+                      <option value="">-- Select Locality in {editData.city} --</option>
+                      {editCityLocalities.map((loc) => (
+                        <option key={loc} value={loc}>{loc}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 

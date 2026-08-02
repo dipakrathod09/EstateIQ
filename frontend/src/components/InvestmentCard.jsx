@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Clock, TrendingUp, Percent, Lock, Banknote } from 'lucide-react';
+import { ArrowRight, Clock, TrendingUp, Percent, Lock, Banknote, AlertTriangle } from 'lucide-react';
 
 const ASSET_CLASS_CONFIG = {
   'Commercial Office': { color: '#1F7A6C', bg: 'rgba(31,122,108,0.12)', border: 'rgba(31,122,108,0.3)', icon: '🏢' },
@@ -86,6 +86,8 @@ const InvestmentCard = ({ listing }) => {
               </div>
             </div>
           )}
+
+
 
           {/* Location */}
           <div className="absolute bottom-3 left-3 z-10 text-white text-xs font-medium">

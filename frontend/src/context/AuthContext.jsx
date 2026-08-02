@@ -54,8 +54,16 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const updatePreferences = async (prefData) => {
+    await client.patch('/auth/preferences/', prefData);
+    const meRes = await client.get('/auth/me/');
+    setUser(meRes.data);
+    localStorage.setItem('estateiq_user', JSON.stringify(meRes.data));
+    return meRes.data;
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updatePreferences }}>
       {children}
     </AuthContext.Provider>
   );

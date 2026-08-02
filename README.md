@@ -1,42 +1,43 @@
-# EstateIQ — AI-Powered Real Estate & Investment Platform
+# EstateIQ — AI-Powered Real Estate Valuation & Investment Platform
 
 ![Django DRF](https://img.shields.io/badge/Backend-Django_DRF_6.0-12283C?style=for-the-badge&logo=django)
 ![React Vite](https://img.shields.io/badge/Frontend-React_18_Vite_V8-B98B4E?style=for-the-badge&logo=react)
-![FastAPI ML](https://img.shields.io/badge/ML_Service-FastAPI_Scikit--Learn-E2574C?style=for-the-badge&logo=fastapi)
-![Tests](https://img.shields.io/badge/Tests-143%2F143_Passing-success?style=for-the-badge)
+![FastAPI ML](https://img.shields.io/badge/ML_Service-FastAPI_XGBoost_100k-E2574C?style=for-the-badge&logo=fastapi)
+![Tests](https://img.shields.io/badge/Tests-170%2F170_Passing-success?style=for-the-badge)
 
-**EstateIQ** is an end-to-end, enterprise-grade real estate platform combining AI-driven valuation predictions, property management & leasing schedules, CRM lead pipelines, and a fractional investment directory.
+**EstateIQ** is an end-to-end real estate platform delivering AI-driven property price valuations, verified market listings across Mumbai, interactive GIS map discovery, digital lease management with payment schedules, and an institutional fractional investment portal.
 
 ---
 
-## 🚀 Key Features
+## ✨ Key Features
 
-### 🏢 1. Core Real Estate Listings & Multi-Field Search
-- Full CRUD operations for commercial, residential, warehousing, and retail properties.
-- Dynamic multi-field filtering: city, locality, price range, BHK configuration, property type, and status.
-- Strict role permissions: Creation restricted to `agent`, `landlord`, and `admin`; public read access for anonymous visitors.
+### 🏠 1. Mumbai Property Marketplace & Interactive GIS Mapping
+- **Diverse Listing Types**: Apartments, Penthouses, Villas, Studio Apartments, and Independent Houses across Mumbai micro-markets (Bandra, Worli, Powai, Lower Parel, Andheri, Juhu, Malad, Thane, Navi Mumbai, Dadar, Goregaon, Borivali, Versova, Chembur, Ghatkopar, Khar).
+- **3 View Modes**: Desktop **Split View** (scrollable grid + sticky interactive Leaflet GIS Map), **Grid View**, and full-width **Map View**.
+- **Multi-Parametric Filter Panel**: Filter by locality autocomplete, BHK configuration, property type, buy/rent intent, price range, and RERA verification.
+- **5-Step Property Wizard**: Step-by-step listing creation with local device file uploads (`FileReader` base64 URLs) and sample image quick-select.
 
-### 🤖 2. Machine Learning Valuation Microservice (FastAPI + Scikit-Learn)
-- Autonomous valuation service hosted on port `8001` trained on 100,000 property data points.
-- Evaluates 24 payload features (location, area, age, amenities, RERA approval, distance to metro/IT hubs).
-- Computes deal classification tags: `Underpriced`, `Fair Price`, or `Overpriced`.
-- **Fault-Tolerant Resiliency**: 3-second timeout protection with graceful degradation (`available: False`) if the ML service is offline.
+### 🤖 2. AI Valuation Microservice (FastAPI + XGBoost)
+- Microservice hosted on port `8001` trained on 100,000 real estate market data points.
+- Computes real-time estimated fair market price (INR), model confidence score, and deal rating tags (`Good Deal (Undervalued)`, `Fair Price`, `Overpriced`).
+- Evaluates 24 features including carpet area, BHK, floor level, building age, facing direction, and proximity to metro stations, schools, hospitals, and IT hubs.
+- **Resilient Fallback**: Graceful degradation if ML service is unreachable.
 
-### 💼 3. Agent & Landlord CRM Pipeline
-- Inquiry submission and tracking pipeline (`new` → `contacted` → `showing_scheduled` → `negotiating` → `closed`).
-- **Owner-Scoped Security**: Strict `get_queryset()` access control ensures agents and landlords only see inquiries submitted for properties they own.
-- Saved properties wishlist for tenant and investor accounts.
+### 📈 3. Investment Directory & Return Calculator
+- Fractional real estate investment opportunities across *Commercial Office*, *Warehousing*, *Pre-Launch Residential*, and *Trophy Residential*.
+- **Interactive Investment Return Calculator**: Dynamic ticket size slider computing estimated monthly rental payouts, annual ROI, and projected 3-year portfolio growth.
+- **Countdown Timers**: Real-time early access countdown timers for pre-launch deals.
+- **Express Interest & Pitch Deck Requests**: Direct investor lead modal capturing ticket preferences.
 
-### 🔑 4. Property Management & Automated Lease Schedules
-- Digital lease agreement lifecycle (`active`, `expired`, `terminated`).
-- **12-Month Payment Schedule Auto-Generation**: Automatically computes monthly rental payment schedules upon lease creation.
-- Tenant portal to review payments and log maintenance requests.
+### 🔑 4. Lease Management, Payments & Maintenance
+- Digital lease agreements tracking active leases, start/end dates, monthly rent, and security deposits.
+- **12-Month Automated Payment Schedule**: Generates monthly payment records with status tracking (`paid`, `unpaid`).
+- **Maintenance Tracking**: Maintenance request tickets with priority status (`low`, `medium`, `high`) and lifecycle tracking (`open`, `in_progress`, `resolved`).
 
-### 📈 5. Investment & Fractional Directory (`/investments`)
-- Directory covering 4 institutional asset classes: *Commercial Office*, *Warehousing*, *Pre-Launch Residential*, and *Retail*.
-- Live real-time ticking countdown timers for pre-launch deals.
-- Prominent SEBI regulatory disclaimer blocks displayed above the fold.
-- **Strict Lead-Generation Boundary**: Every user interaction yields a lead inquiry (`InvestmentInquiry`) with **zero transaction or payment processing overhead**.
+### 👤 5. Multi-Role Portal & Onboarding
+- Role-tailored dashboards for **Landlord**, **Agent**, **Tenant**, and **Investor** accounts.
+- Personalized onboarding wizard capturing preferred city, intent, BHK preferences, and budget ranges.
+- 1-click persona demo login options for easy evaluation.
 
 ---
 
@@ -44,10 +45,10 @@
 
 | Layer | Technology |
 |---|---|
-| **Frontend** | React 18, Vite 8, Lucide Icons, Custom CSS ("Blueprint Skyline" Design Token System) |
-| **Backend API** | Django 6.0, Django REST Framework, SimpleJWT (Bearer Authentication) |
-| **ML Microservice** | FastAPI, Uvicorn, Scikit-Learn (Random Forest Regressor), Joblib |
-| **Database** | SQLite (Dev) / PostgreSQL (Production) |
+| **Frontend** | React 18, Vite 8, TailwindCSS, Lucide Icons, Leaflet Maps |
+| **Backend API** | Python 3.14, Django 6.0, Django REST Framework, SimpleJWT (Bearer Auth) |
+| **ML Microservice** | FastAPI, Uvicorn, XGBoost 100k Regressor, Joblib, Scikit-Learn |
+| **Database** | SQLite (Dev) / PostgreSQL (Production ready) |
 
 ---
 
@@ -82,25 +83,17 @@ venv\Scripts\activate
 pip install -r requirements.txt
 python manage.py migrate
 
-# Seed base properties & CRM data:
-# On Windows (PowerShell):
-Get-Content seed_db.py | python manage.py shell
-# On macOS/Linux:
-# python manage.py shell < seed_db.py
-
-# Seed Phase 5 investment directory listings:
-# On Windows (PowerShell):
-Get-Content investments/seed_investments.py | python manage.py shell
-# On macOS/Linux:
-# python manage.py shell < investments/seed_investments.py
+# Seed database with fresh Mumbai properties, users, leases, payments, and investments:
+python seed_db.py
+python seed_crm.py
 
 python manage.py runserver 8000
 ```
 
-#### ML Microservice (FastAPI)
+#### ML Valuation Service (FastAPI)
 ```bash
 cd ml-service
-# In a new terminal window with venv activated:
+# In a new terminal window:
 pip install -r requirements.txt
 python -m uvicorn main:app --host 0.0.0.0 --port 8001
 ```
@@ -116,34 +109,30 @@ Open **`http://localhost:5173`** in your browser.
 
 ---
 
-## 🧪 Running the Test Suite
+## 🧪 Running Automated Tests
 
-The repository contains **143 automated Pytest unit and integration tests** with a 100% pass rate.
+The repository includes **170 passing Pytest unit & integration tests**:
 
 ```bash
 cd backend
-# Run full test suite:
 python -m pytest tests/ --tb=short
-
-# Run specific Phase 5 investments test suite:
-python -m pytest tests/test_investments.py --tb=short
 ```
 
 ---
 
 ## 🔐 Role-Based Access Control (RBAC) Matrix
 
-| Role | Property Write | Inquiry Read | Lease Access | Investment Listing Write |
+| Role | Property Write | CRM Inquiries | Lease Access | Investment Creation |
 |---|---|---|---|---|
 | **Anonymous** | ❌ | ❌ | ❌ | ❌ |
 | **Tenant** | ❌ | ❌ (Own only) | ✅ (Own lease) | ❌ |
 | **Investor** | ❌ | ❌ (Own only) | ❌ | ❌ |
-| **Agent** | ✅ (Own) | ✅ (Own properties) | ❌ | ✅ (Own) |
-| **Landlord** | ✅ (Own) | ✅ (Own properties) | ✅ (Own properties) | ✅ (Own) |
+| **Agent** | ✅ (Own) | ✅ (Own listings) | ❌ | ✅ (Own) |
+| **Landlord** | ✅ (Own) | ✅ (Own listings) | ✅ (Own properties) | ✅ (Own) |
 | **Admin** | ✅ (All) | ✅ (All) | ✅ (All) | ✅ (All) |
 
 ---
 
 ## 📜 License
 
-Distributed under the MIT License. See `LICENSE` for details.
+Distributed under the MIT License.
